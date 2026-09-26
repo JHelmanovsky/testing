@@ -4,6 +4,7 @@ import crypto from 'node:crypto'
 import { Noble } from '@freesewing/noble'
 import { cisFemaleAdult38 } from '@freesewing/models'
 import { version as coreVersion } from '@freesewing/core'
+import { degreeMeasurements } from '@freesewing/config'
 
 const outDir = path.resolve('output')
 fs.mkdirSync(outDir, { recursive: true })
@@ -46,6 +47,7 @@ function draft(label, measurements, settings = {}) {
   stats.label = label
   stats.patternWidth = Number.isFinite(pattern.width) ? pattern.width : null
   stats.patternHeight = Number.isFinite(pattern.height) ? pattern.height : null
+  stats.partCount = Object.keys(pattern.parts || {}).length
   stats.logSummary = Object.fromEntries(
     Object.entries(pattern.getLogs()?.pattern || {}).map(([level, entries]) => [
       level,
@@ -56,6 +58,14 @@ function draft(label, measurements, settings = {}) {
 }
 
 const baseline = draft('noble-baseline', model)
+const baselineRepeat = draft('noble-baseline-repeat', model)
+const determinismTest = {
+  identicalSvgHash: baseline.sha256 === baselineRepeat.sha256,
+  identicalViewBox: baseline.viewBox === baselineRepeat.viewBox,
+  identicalBytes: baseline.bytes === baselineRepeat.bytes,
+  sha256First: baseline.sha256,
+  sha256Second: baselineRepeat.sha256,
+}
 
 const sensitivity = []
 for (const key of required) {
@@ -77,11 +87,7 @@ for (const key of required) {
   })
 }
 
-const bustKey =
-  required.find((k) => /chestCircumference/i.test(k)) ||
-  required.find((k) => /bustCircumference/i.test(k)) ||
-  required.find((k) => /bust/i.test(k)) ||
-  required.find((k) => /chest/i.test(k))
+const bustKey = required.includes('chest') ? 'chest' : required.find((k) => /bustCircumference/i.test(k)) || required.find((k) => /bust/i.test(k)) || required.find((k) => /chest/i.test(k))
 
 const waistKey =
   required.find((k) => /naturalWaist/i.test(k)) ||
@@ -175,6 +181,8 @@ const results = {
     optionalMeasurements: optional,
   },
   baseline,
+  baselineRepeat,
+  determinismTest,
   bustTest,
   waistTest,
   seamAllowanceTest,
@@ -182,6 +190,7 @@ const results = {
   sensitivity,
   summary: {
     requiredMeasurementCount: required.length,
+    deterministicRepeatPassed: determinismTest.identicalSvgHash && determinismTest.identicalViewBox && determinismTest.identicalBytes,
     measurementsChangingGeometry: changedCount,
     allRequiredMeasurementsChangedGeometry: allRequiredInfluenceGeometry,
     bustAutomationPassed: bustTest ? bustTest.geometryChanged : null,
@@ -200,6 +209,8 @@ const lines = [
   '- Required keys: ' + required.join(', '),
   '- Baseline SVG bytes: ' + baseline.bytes,
   '- Baseline SVG paths: ' + baseline.pathCount,
+  '- Baseline pattern parts: ' + baseline.partCount,
+  '- Deterministic repeat: ' + (results.summary.deterministicRepeatPassed ? 'PASS' : 'FAIL'),
   '- Baseline viewBox: ' + baseline.viewBox,
   '',
   '## Key automation checks',
@@ -213,10 +224,10 @@ const lines = [
   '',
   '## Sensitivity matrix',
   '',
-  '| Measurement | Before (mm) | After (mm) | Geometry changed | SVG bytes delta |',
-  '|---|---:|---:|:---:|---:|',
+  '| Measurement | Unit | Before | After | Geometry changed | SVG bytes delta |',
+  '|---|---|---:|---:|:---:|---:|',
   ...sensitivity.map((x) =>
-    '| ' + x.measurement + ' | ' + x.beforeMm + ' | ' + x.afterMm + ' | ' +
+    '| ' + x.measurement + ' | ' + (degreeMeasurements.includes(x.measurement) ? 'deg' : 'mm') + ' | ' + x.beforeMm + ' | ' + x.afterMm + ' | ' +
     (x.geometryChanged ? 'YES' : 'NO') + ' | ' + x.svgBytesDelta + ' |'
   ),
 ]
