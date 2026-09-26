@@ -225,3 +225,5 @@ fs.writeFileSync(path.join(outDir, 'report.md'), lines.join('\n'))
 console.log(JSON.stringify(results, null, 2))
 
 if (!bustTest?.geometryChanged || !waistTest?.geometryChanged) process.exitCode = 2
+
+// trigger workflow after workflow file exists
