@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { Noble } from '@freesewing/noble'
-import { womenswear38 } from '@freesewing/models'
+import { cisFemaleAdult38 } from '@freesewing/models'
 import { version as coreVersion } from '@freesewing/core'
 
 const outDir = path.resolve('output')
@@ -10,11 +10,11 @@ fs.mkdirSync(outDir, { recursive: true })
 
 const required = [...Noble.patternConfig.measurements]
 const optional = [...(Noble.patternConfig.optionalMeasurements || [])]
-const model = { ...womenswear38 }
+const model = { ...cisFemaleAdult38 }
 
 const missingFromModel = required.filter((key) => !Number.isFinite(model[key]))
 if (missingFromModel.length) {
-  throw new Error('womenswear38 is missing Noble measurements: ' + missingFromModel.join(', '))
+  throw new Error('cisFemaleAdult38 is missing Noble measurements: ' + missingFromModel.join(', '))
 }
 
 const sha256 = (text) => crypto.createHash('sha256').update(text).digest('hex')
