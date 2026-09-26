@@ -9,6 +9,7 @@
     "@freesewing/core": "4.10.2",
     "@freesewing/bella": "4.10.2",
     "@freesewing/noble": "4.10.2",
-    "@freesewing/models": "4.10.2"
+    "@freesewing/models": "4.10.2",
+    "@freesewing/config": "4.10.2"
   }
 }
