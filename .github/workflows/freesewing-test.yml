@@ -15,6 +15,13 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Inspect FreeSewing package metadata
+        run: |
+          npm view @freesewing/core@4.10.2 dependencies peerDependencies --json
+          npm view @freesewing/core-plugins@4.10.2 dependencies peerDependencies --json
+          npm view @freesewing/bella@4.10.2 dependencies peerDependencies --json
+          npm view @freesewing/noble@4.10.2 dependencies peerDependencies --json
+          npm view @freesewing/models@4.10.2 dependencies peerDependencies --json
       - run: npm test
       - uses: actions/upload-artifact@v4
         if: always()
