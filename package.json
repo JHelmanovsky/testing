@@ -11,6 +11,7 @@
     "@freesewing/noble": "4.10.2",
     "@freesewing/models": "4.10.2",
     "@freesewing/config": "4.10.2",
-    "@freesewing/library": "4.10.2"
+    "@freesewing/library": "4.10.2",
+    "@freesewing/plugin-transform": "4.10.2"
   }
 }
