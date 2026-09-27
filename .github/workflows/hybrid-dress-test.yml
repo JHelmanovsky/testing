@@ -1,0 +1,39 @@
+name: Hybrid Dress Pattern Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Generate FreeSewing Noble bodice reference
+        run: node hybrid-freesewing.mjs
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Clone GarmentCode
+        run: git clone --depth 1 https://github.com/maria-korosteleva/GarmentCode.git garmentcode
+      - name: Install minimal GarmentCode runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./garmentcode --no-deps
+          pip install "numpy<2" scipy "pyyaml>=6.0" svgwrite svgpathtools psutil matplotlib CairoSVG
+      - name: Generate requested complete dress
+        run: python hybrid-garmentcode.py
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hybrid-dress-pattern-test
+          path: hybrid-output/
