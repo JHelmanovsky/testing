@@ -115,7 +115,7 @@ results = {
         "necklineChangesGeometry": square["specSha256"] != baseline["specSha256"],
         "skirtChangesGeometry": pencil["specSha256"] != baseline["specSha256"],
         "bodyChangesGeometry": body_changed_result["specSha256"] != baseline["specSha256"],
-        "deterministicGeometry": repeat["specSha256"] == baseline["specSha256"],
+        "deterministicGeometry": repeat["svgSha256"] == baseline["svgSha256"],
         "baselineNoSelfIntersection": not baseline["selfIntersecting"],
     }
 }
